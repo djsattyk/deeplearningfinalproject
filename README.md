@@ -1,4 +1,15 @@
-# Class Project Website Template
+# CS 7150 Project
+
+## Aniket Lachyankar (lachyankar.a@northeastern.edu) and Satwik Kamarthi (kamarthi.s@northeastern.edu)
+
+
+
+
+
+
+
+
+
 
 Copy this template on github, and rename the repo to the name of your project.
 
