@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+<head>
+<title>Image classification in the Medical Domain</title>
+<meta property="og:title" content=Your Project Name" />
+<meta name="twitter:title" content="Your Project Name" />
+<meta name="description" content="Your project about your cool topic described right here." />
+<meta property="og:description" content="Your project about your cool topic described right here." />
+<meta name="twitter:description" content="Your project about your cool topic described right here." />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" /> 
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<!-- bootstrap for mobile-friendly layout -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct" crossorigin="anonymous"></script>
+<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet">
+<link href="style.css" rel="stylesheet">
+
+</head>
+<body class="nd-docs">
+<div class="nd-pageheader">
+ <div class="container">
+ <h1 class="lead">
+ <nobr class="widenobr">Image Classification for CT Scans</nobr>
+ <nobr class="widenobr">For CS 7150</nobr>
+ </h1>
+ </div>
+</div><!-- end nd-pageheader -->
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+    <div class="navbar-nav">
+      <a class="nav-link" href="index.html">Home</a>
+      <a class="nav-link" href="proposal.html">Proposal</a>
+      <a class="nav-link active" href="progress.html">Progress</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+<div class="row">
+<div class="col justify-content-center text-center">
+<h2>Image classification in the Medical Domain</h2>
+<p>Top image classification models work well on the major datasets, but how do they perform on CT scans?</p>
+</div>
+</div>
+<div class="row">
+<div class="col">
+
+<div class="text-center"><h2 name="title">Project Progress Report</h2></div>
+
+
+<div class="text-center"><h3>Concept Review</h3></div>
+
+
+<div class="container">
+<div class="row">
+<div class="col">
+<h4> Vision Transformer Review</h4>
+<img src="images/vit-model.png" class="mx-auto d-block img-fluid inline-block" alt="Vision Transformer Model Architecture">
+<div class="text-center caption"><em>Image taken from "An image is worth 16x16 words: Transformers for image recognition at scale"[1]</em></div>
+<p>The first model that we will review is the newer transformer based architecture that has been explored as a part of image classification and computer vision related tasks. Vision Transformers (ViT) were presented as a new model architecture in [1] as a result of the immense success of Transformers in natural language processing tasks. The main idea that the paper poses is to take the Transformer architecture found in [3] and apply it as simply as possible to image data. To do this, the ViT model proposes that images be split into smaller patches then flattened to patch embeddings. Once this has been done, the sequential data is in a form that fits the structure of a sequential NLP word embedding input. At this point we can pass the position and patch embeddings to the transformer encoder. One difference between the ViT and normal transformers are that the ViT only uses the encoder part of the transformer without the decoder. Instead of using a decoder to recreate or synthesize data, an MLP classification head uses the input of the Transformer Encoder and uses the latent space output of the encoder to classify the image.</p>
+
+</div>
+</div>
+
+
+<div class="row">
+<div class="col">
+<h4> ResNet Review</h4>
+<img src="images/ResNet-model-2.png" class="mx-auto d-block img-fluid inline-block" alt="ResNet Model Architecture">
+<div class="text-center caption"><em>ResNet-34 model architecture from <a href="https://towardsdatascience.com/an-overview-of-resnet-and-its-variants-5281e2f56035"> An Overview of ResNet and its Variants</a></em></div>
+
+
+
+<p> 
+  The second model that we will be using as a comparison is one of the best and most widely known CNN architecture ResNet. One of the major problem with deep CNNs is the problem of the vanishing gradients. This is because the gradient in many cases, especially with normalized pixel values, is a value less than 1. When we multiply many of these gradients together, the result is a near 0 decimal at the beginning layers of the network leading to low performance after training. The solution that was proposed was the residual connection block. 
+</p>
+
+<img src="images/residual-block.png" class="mx-auto d-block img-fluid inline-block" alt="ResNet Model Architecture">
+<div class="text-center caption"><em>Residual Block from <a href="https://towardsdatascience.com/an-overview-of-resnet-and-its-variants-5281e2f56035"> An Overview of ResNet and its Variants</a>
+</em>
+</div>
+
+<p>
+  Here we see the residual block that add the input to a previous layer to an output of a layer. This results in an output and gradient that is less prone to vanishing gradients because we not only have the activation values but also the input activations from some arbitrary previous layers. This means that the activations are larger leading to less problems of minute gradients. In addition to this, the skip connections provide additional paths for the gradient to travel to any node where the output of the layer was used as part of the skip connection. This leads to exceedingly larger deep networks that perform better than previously expected. These models can lead to longer training time and model size, but the model now has the excess capability to generate even more complex classification spaces for the data it receives during training. 
+</p>
+</div>
+</div>
+
+
+<div class="text-center"><h3>Implementation Overview</h3></div>
+
+<h4>Data Details</h4>
+
+<p>For our project, as mentioned in our proposal, the data that we are using is from the <a href="https://www.kaggle.com/competitions/rsna-2022-cervical-spine-fracture-detection">RSNA 2022 Cervical Spine Fracture Detection</a> competition. This dataset includes approximately 3000 CT scans from various sites that have been collected by the RSNA (Radiological Society of North America). Each study contains approximately 300 slices of the cervical spine taken at >1 mm. These images are provided as a medical imaging field-specific file form (.dcm) and contain metadata about the different aspects of the scan like the type (CT) and where it was taken (Cervical Spine (CS)). For specifics about the size of the image, they are presented as 512x512x3 (H x W x C) images. In some cases, the images have different colors due to the protocol used for grabbing the CT information from the machine. This presents an interesting problem as we still explore ways to best prepare the data for the model. This is something we will go over in the Observation Overview.</p>
+
+<h4>Model Details</h4>
+
+<p>
+At the current moment, our experiments have not been run as we have been focusing on EDA for the models, but we are able to provide information about the implementation details that we expect to have for the final result. 
+</p>
+
+<h5> ViT Model Details</h5>
+
+<p>
+  For the ViT model, we use the <a href="https://huggingface.co/docs/transformers/model_doc/vit">Vision Transformer </a> implementation from Hugging Face. Additionally, since we do not want to train a vanilla ViT model, we will be using the pretrained weights from hugging face as well that is provided by <a href="https://huggingface.co/google/vit-large-patch16-384">Google</a>. This model pre-training was trained on a large scale image classification dataset ImageNet-21k. As a result, the model is quite fine tuned to the task of image classification. Below we present the Pytorch Summary for the model we take from Hugging face which shows the stages and the parameter sizes of the model for 1 input image.  
+</p>
+<img src="images/vit-params.png" class="mx-auto d-block img-fluid inline-block" alt="ResNet Model Architecture">
+<div class="text-center caption"><em>Vision Transformer (ViT) Model Summary</em></div>
+
+
+<p>
+  For this model, we will be required to adjust the input images to size (3, 224, 224) as huggingface does not have pre-trained models for images of size 512. Additionally, as we can see based on the parameter size, even with 1 image, we will be required to use about 2.4 GB of GPU memory. This tradeoff may prove to be be significant as we will lose some pixel features in the image for the classification model to learn on. <br><br>
+
+  For the experiment hyperparameters/optimizers, we will use the following:
+</p>
+
+
+<table class="table table-striped w-50">
+  <thead>
+    <tr>
+      <th scope="col">Hyperparameter/Optimizer</th>
+      <th scope="col">Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row" class="w-25">Loss Function</th>
+      <td class="w-25">Binary Cross Entropy</td>
+    </tr>
+    <tr>
+      <th scope="row" class="w-25">Learning Rate</th>
+      <td class="w-25">3e-05</td>
+    </tr>
+        <tr>
+      <th scope="row" class="w-25">Batch Size</th>
+      <td class="w-25">12</td>
+    </tr>
+    </tr>
+        <tr>
+      <th scope="row" class="w-25">Optimizer</th>
+      <td class="w-25">Adam</td>
+    </tr>
+    <tr>
+      <th scope="row" class="w-25">Adam Betas</th>
+      <td class="w-25">(0.9, 0.999)</td>
+    </tr>
+    <tr>
+      <th scope="row" class="w-25">Adam Epsilon</th>
+      <td class="w-25">1e-08</td>
+    </tr>
+    <tr>
+      <th scope="row" class="w-25">Epochs</th>
+      <td class="w-25">5</td>
+    </tr>
+    <tr>
+      <th scope="row" class="w-25">Learning Rate Sceduler</th>
+      <td class="w-25">Linear</td>
+    </tr>
+
+  </tbody>
+</table>
+
+
+<h5> ResNet Model Details</h5>
+
+<p>
+  Similar to the ViT model, our <a href="https://huggingface.co/docs/transformers/model_doc/resnet">ResNet</a> implementation is taken from HuggingFace. For this model, we use a pre-trained weight checkpoint provided by <a href="https://huggingface.co/microsoft/resnet-50">Microsoft</a>. There are many variants of the ResNet model with different depths (i.e. 34, 50, 101 convolutional layers), and for this project, we will use ResNet-50 as a medium sized model to allow for a balance between performance and training time. Below we provide the summary for the model that we will be using based on the parameter and 
+</p>
+
+<img src="images/resnet-params.png" class="mx-auto d-block img-fluid inline-block" alt="ResNet Model Architecture">
+<div class="text-center caption"><em>ResNet-50 Model Summary</em></div>
+
+<p>Similar to the ViT, we will resize the CT Scan images to (3,224,224) to allow for reasonable training size rather than keeping the image size 512. This will allow for better comparison between the models as well as reasonable training size and time for the ResNet model.<br><br>
+ The model hyperparameters are provided below. The settings for these parameters were inspired by <a href="https://pytorch.org/blog/how-to-train-state-of-the-art-models-using-torchvision-latest-primitives/">this</a> PyTorch blogpost:</p>
+
+ <table class="table table-striped w-50">
+  <thead>
+    <tr>
+      <th scope="col">Hyperparameter/Optimizer</th>
+      <th scope="col">Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row" class="w-25">Loss Function</th>
+      <td class="w-25">Binary Cross Entropy</td>
+    </tr>
+    <tr>
+      <th scope="row" class="w-25">Learning Rate</th>
+      <td class="w-25">0.5</td>
+    </tr>
+    <tr>
+      <th scope="row" class="w-25">Learning Rate Sceduler</th>
+      <td class="w-25">Cosine Annealing</td>
+    </tr>
+    <tr>
+      <th scope="row" class="w-25">Learning Rate Warmup Epochs</th>
+      <td class="w-25">5</td>
+    </tr>
+    <tr>
+      <th scope="row" class="w-25">Learning Rate Warmup Method</th>
+      <td class="w-25">linear</td>
+    </tr>
+    <tr>
+      <th scope="row" class="w-25">Learning Rate Warmup Decay</th>
+      <td class="w-25">0.01</td>
+    </tr>
+    <tr>
+      <th scope="row" class="w-25">Batch Size</th>
+      <td class="w-25">24</td>
+    </tr>
+    </tr>
+        <tr>
+      <th scope="row" class="w-25">Optimizer</th>
+      <td class="w-25">SGD (Stochastic Gradient Descent)</td>
+    </tr>
+    <tr>
+      <th scope="row" class="w-25">SGD Momentum</th>
+      <td class="w-25">0.9</td>
+    </tr>
+    <tr>
+      <th scope="row" class="w-25">Weight Decay</th>
+      <td class="w-25">2e-05</td>
+    </tr>
+    <tr>
+      <th scope="row" class="w-25">Epochs</th>
+      <td class="w-25">100</td>
+    </tr>
+
+
+
+  </tbody>
+</table>
+
+<p>
+  One thing that may be noticed is the small batch size. Since we are bound by GPU Memory size, we will chose 12 and 24 as the batch size because we do not want to run out of memory when computing the forward and backwards passes along with updating the parameters. This will allow us to use approximately 6 GB of memory for both models, which we may increase with additional compute resources.
+</p>
+
+
+
+<div class="text-center"><h3>Observations Overview</h3></div>
+
+<p>
+  The bulk of our work between Milestone 1 and Milestone 2 was with our dataset. There is a steep learning curve understanding cervical spine data and how to best represent the spine images to input into our model. Below we will explain the data, our exploration, and our work preprocessing the data thus far.
+  <br>
+  <br>
+  In the training images, there are 2000 patients each with anywhere from 300 to 600 digital imaging files (.dcm)  to train our model. Each image is an axial scan of one of seven possible vertebrae in the cervical spine of the patient, where one of these images shows a fracture at a given vertebrate. We then looked at the training csv file to gain more insights into the distribution of the data.  Below we can see that the overall split of the training data is 1058 no fracture and 961 with fracture. We can also see that between the seven different vertebrae, the most common fractures are in C7 and C2. 
+</p>
+
+
+<div class="row">
+
+<div class="col">
+<img src="images/patient-count.jpeg" class="img-fluid" alt="ResNet Model Architecture">
+</div>  
+<div class="col">
+<img src="images/vertebrae-count.jpeg" class="img-fluid float-bottom" alt="ResNet Model Architecture">
+</div>
+</div>
+
+<div class="text-center caption">
+  <em>
+    Fracture count based on patient overall and specific vertebrae
+  </em>
+</div>
+
+
+<p>We reached out to a medical professional to understand the best approach to this problem. He stated that the best view to detect spinal fractures is a sagittal view. Given this information we focused our attention to converting all the axial images given from the dataset to sagittal views. In short, we accessed the DICOM image metadata, added a modality dictionary entry to get a sagittal CT scan into the metadata. Below we are showing one slice of the sagittal view of one patient and showing how we can see how we converted an axial view of a scan to a sagittal view.
+</p>
+
+<div class="row">
+
+<div class="col">
+<img src="images/axial.jpeg" class="img-fluid" alt="ResNet Model Architecture">
+</div>  
+<div class="col">
+<img src="images/sagittal.jpeg" class="img-fluid" alt="ResNet Model Architecture">
+</div>
+</div>
+
+<div class="text-center caption">
+  <em>
+    Axial vs Sagittal View for CT Scan
+  </em>
+</div>
+
+We are currently in the process of converting each patient's axial scans into sagittal scans as a new dataset to train our model with, and we hope to complete that within the next week. 
+
+
+<div class="text-center"><h3>Future Plans</h3></div>
+
+
+
+<h3>References</h3>
+
+
+<p>[1] Dosovitskiy, A., Beyer, L., Kolesnikov, A., Weissenborn, D., Zhai, X., Unterthiner, T. & Houlsby, N. "An image is worth 16x16 words: Transformers for image recognition at scale". <em>arXiv preprint arXiv:2010.11929,</em>  2020.</p>
+
+<p>[2] He, K., Zhang, X., Ren, S., and Sun, J., "Deep Residual Learning for Image Recognition", <em> arXiv preprints arXiv:1512.03385,</em> 2015.</p>
+
+<h2>Team Members</h2>
+                                                   
+<p>Aniket Lachyankar (lachyankar.a@northeastern.edu) and Satwik Kamarthi (kamarthi.s@northeastern.edu) </p>
+
+  
+</div><!--col-->
+</div><!--row -->
+</div> <!-- container -->
+
+<footer class="nd-pagefooter">
+  <div class="row">
+    <div class="col-6 col-md text-center">
+      <a href="https://cs7150.baulab.info/">About CS 7150</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+<script>
+$(document).on('click', '.clickselect', function(ev) {
+  var range = document.createRange();
+  range.selectNodeContents(this);
+  var sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+});
+// Google analytics below.
+window.dataLayer = window.dataLayer || [];
+</script>
+</html>

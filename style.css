@@ -1,7 +1,7 @@
 body, td, th {
   font-family: 'Open Sans', sans-serif;
 }
-h2 {
+h2, h3, h4 {
   margin-top: 3ex;
 }
 /* Deep blues */
@@ -67,3 +67,15 @@ h2 {
 nobr.widenobr {
   white-space: normal;
 }
+
+.caption {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.table {
+    margin: 0 auto;
+    margin-bottom: 15px;
+    width: 80%;
+}
+
