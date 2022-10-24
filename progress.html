@@ -153,7 +153,7 @@ At the current moment, our experiments have not been run as we have been focusin
     </tr>
     <tr>
       <th scope="row" class="w-25">Epochs</th>
-      <td class="w-25">5</td>
+      <td class="w-25">10</td>
     </tr>
     <tr>
       <th scope="row" class="w-25">Learning Rate Sceduler</th>
@@ -292,7 +292,7 @@ We are currently in the process of converting each patient's axial scans into sa
 
 <div class="text-center"><h3>Future Plans</h3></div>
 
-<p>Given that we have not gotten a full run of the model on our dataset at this point, our plan is to continue with the project as designed. For the most part, we have settled on the settings of our dataset (Sagittal view) and are ready to perform the training experiments. There may be many problems that we run into in the case of the training, but the most likely problems that we will run into are: Dataset imbalance (i.e. many specific vertebrae do not have </p>
+<p>Given that we have not gotten a full run of the model on our dataset at this point, our plan is to continue with the project as designed. For the most part, we have settled on the settings of our dataset (Sagittal view) and are ready to perform the training experiments. There may be many problems that we run into in the case of the training, but the most likely problems that we think we may run into are: dataset scarcity (i.e. low amount of single vertebrae fractures) and training size (models are large with long runtimes for training). For the first problem, we hope that data augmentation will prove sufficient enough to provide data diversity with the predictions. For the second problem, we expect that there may not be an obvious solution given the size of the models, but hope that our hyperparameter settings allow for the models to converge to a solution within the amount of epochs that are chosen at the time. </p>
 
 
 
