@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="en">
+<head>
+<title>Image classification in the Medical Domain</title>
+<meta property="og:title" content="Image classification in the Medical Domain" />
+<meta name="twitter:title" content="Image classification in the Medical Domain" />
+<meta name="description" content="Using top image classification models to learn the Cervical Spine Fracture Detection task." />
+<meta property="og:description" content="Using top image classification models to learn the Cervical Spine Fracture Detection task." />
+<meta name="twitter:description" content="Using top image classification models to learn the Cervical Spine Fracture Detection task." />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" /> 
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<!-- bootstrap for mobile-friendly layout -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct" crossorigin="anonymous"></script>
+<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet">
+<link href="style.css" rel="stylesheet">
+
+</head>
+<body class="nd-docs">
+<div class="nd-pageheader">
+ <div class="container">
+ <h1 class="lead">
+ <nobr class="widenobr">Image Classification for CT Scans</nobr>
+ <nobr class="widenobr">For CS 7150</nobr>
+ </h1>
+ </div>
+</div><!-- end nd-pageheader -->
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+    <div class="navbar-nav">
+      <a class="nav-link" href="index.html">Home</a>
+      <a class="nav-link" href="proposal.html">Proposal</a>
+      <a class="nav-link" href="progress.html">Progress</a>
+      <a class="nav-link active" href="final_presentation.html">Final Presentation</a>
+    </div>
+  </div>
+</nav>
+
+
+
+
+<div class="container">
+<div class="row">
+<div class="col justify-content-center text-center">
+<h2>Image classification in the Medical Domain</h2>
+<p>Top image classification models work well on the major datasets, but how do they perform on CT scans?</p>
+</div>
+</div>
+<div class="row">
+<div class="col">
+
+<div class="text-center"><h2 name="title">Project Final Report</h2></div>
+
+
+
+
+<img src="images/main-figure.png" class="mx-auto d-block img-fluid inline-block" alt="Vision Transformer Model Architecture">
+<div class="text-center caption"><em>Figure 1. Project Overview. This image provides a high level overview of the tasks that we completed during the project. </em></div>
+
+<div class="text-center"><h3>Introduction</h3></div>
+
+<p> 
+  We want to answer the question of whether SOTA image classification models can perform well on not only the common ImageNet benchmark, but also in more specific and specialized domains. We chose to test the most common image classification model currently, <a href="https://huggingface.co/docs/transformers/model_doc/resnet">ResNet[2]</a>, and compare its performance to a more modern approach, <a href="https://huggingface.co/docs/transformers/model_doc/vit"> Vision Transformers[1]</a>, in a biomedical application. We found a dataset in a <a href="https://www.kaggle.com/competitions/rsna-2022-cervical-spine-fracture-detection"> Kaggle competition </a> through the RSNA (Radiological Society of North America) that contains CT scan images of cervical spines of 3000 subjects around the world.The objective is to detect fractures in the cervical spinal CT scans. These images present different problems as the task of classification is tough for highly trained humans let alone machine learning models. One aspect that we hope to understand in addition to the performance of training the models on CT scans is to understand if a pretrained model that has high in classification accuracy on the <a href="https://www.image-net.org/"> ImageNet </a> dataset provides a suitable checkpoint to finetune the respective models for the CT Cervical Spine Fracture test. 
+</p>
+
+<div class="text-center"><h3>Background</h3></div>
+
+
+<p>We are basing our project of <a href="https://arxiv.org/abs/2010.11929">An Image is Worth 16x16 Words: Transformers For Image Recognition At Scale[1]</a>. The paper’s main claim is that the reliance on current state of the art CNNs is not necessary and that a pure transformer applied directly to a sequence of image patches can perform very well on image classification tasks. The paper finds that Vision Transformers (ViT) produced excellent results and required fewer computational resources to train compared to CNNs. Our main question, aforementioned, is to see how ViT will perform in a biomedical application. The paper shows that with ImageNet and other popular image datasets that ViT can be better, and so we wanted to expand on this and try a more niche image type and see if that trend continues. This paper’s results set the foundation for our question and we try to recreate the same successful results in a different context.</p>
+
+<div class="text-center"><h3>Methods</h3></div>
+
+<h4>Data Pre-Processing</h4>
+
+<p> The main goal for data preprocessing is convert the original data from the dataset, which was in the form of axial view DICOM (Digital Imaging and Communications in Medicine) scan images, to sagittal view JPG scan images. Luckily, there is a library already created in Python that we were able to import in order to manipulate the DICOM images. </p> <br><br>
+
+<p>
+<a href="https://pydicom.github.io/"> Pydicom </a> was introduced in 2017 and is the leading library for medical image datasets, storage and transfer. Although not complete, the documentation is very thorough and useful in our use case. This library can directly view and manipulate the data from the DICOM information. From the documentation and resources taken from previous work done on kaggle, we were able to find a suitable method for taking the axial scans of one patient and putting them together to extract sagittal view images. </p>
+
+<p>The process for our conversion, for a single image, is simplified into the following list of steps:
+
+<ol>
+  <li>Sort each slice of the 2-D Axial DICOM image in order.</li>
+  <li>Create a pixel spacing to slice thickness ratio.</li>
+  <li>Create empty 3-D array and fill with slices and pixels from the DICOM image</li>
+  <li>Multiply the 3-D array with a sagittal aspect ratio to get sagittal view</li>
+  <li>Flip array and rotate (transpose) to get the correct sagittal view.</li>
+</ol>  
+
+For each of the 2019 training cases, there were anywhere from 300 - 600 DICOM axial scan images. We were able to develop 25 sagittal view scan images per training case centered around the middle slice of each image so we can get the clearest and thickest view of the spine (where a fracture is more visible) rather than the edges of the spine. For each of the 3 training cases, we developed 100 sagittal view scan images taking a bulk of the images from the entire scan rather than just sampling from the middle. 
+</p>
+
+<p>Below are examples of three different patients. The first image is the axial view from the center of the spine. The second image is the center most slice of our converted sagittal view:
+</p>
+
+<div class="row">
+<div class="col">
+<img src="images/patient_images/patient1/Axial-Final1.jpg" class="img-fluid" alt="Patient 1 Axial Scan Slice">
+</div>  
+<div class="col">
+<img src="images/patient_images/patient1/Sagittal-Final1.jpg" class="img-fluid" alt="Patient 1 Sagittal Scan Slice">
+</div>
+</div>
+
+<div class="text-center caption">
+  <em>
+    Figure 2. Patient 1 Axial and Sagittal Scans
+  </em>
+</div>
+
+<div class="row">
+<div class="col">
+<img src="images/patient_images/patient2/Axial-Final2.jpg" class="img-fluid" alt="Patient 2 Axial Scan Slice">
+</div>  
+<div class="col">
+<img src="images/patient_images/patient2/Sagittal-Final2.jpg" class="img-fluid" alt="Patient 2 Sagittal Scan Slice">
+</div>
+</div>
+
+<div class="text-center caption">
+  <em>
+    Figure 3. Patient 2 Axial and Sagittal Scans
+  </em>
+</div>
+
+<div class="row">
+<div class="col">
+<img src="images/patient_images/patient3/Axial-Final3.jpg" class="img-fluid" alt="Patient 3 Axial Scan Slice">
+</div>  
+<div class="col">
+<img src="images/patient_images/patient3/Sagittal-Final3.jpg" class="img-fluid" alt="Patient 3 Sagittal Scan Slice">
+</div>
+</div>
+
+<div class="text-center caption">
+  <em>
+    Figure 4. Patient 3 Axial and Sagittal Scans
+  </em>
+</div>
+
+From the examples above, we see that the axial scans that have uniform size and shape, is transformed into a sagittal view using consecutive axial scans. One unintended consequence of this transformation is that we have a variable size sagittal image where the axial images where all uniform square size. Many models need a uniform size input to be able to correctly predict the classification labels and this was a major roadblock that we ran into when running the HuggingFace models on our CT scan dataset. 
+
+<h4> Data Augmentations </h5>
+
+<p> To train the model, we had to generate the relevant PyTorch Datasets and Dataloaders along with making sure that the data in the classes were prepared for the model. One thing, as mentioned before, that we noticed in the data preprocessing stage was that the method for converting an axial scan created images with non-uniform size. A common requirement for most dataloaders in PyTorch is that they require the input data in the batch tensor to contain the same amount of data per element in the batch. Because of the way that pytorch tensors work generally, they do not allow for variable size inside their tensors. To combat this problem we would need to augment the images to ensure uniform size. To do this, we found the <a href="https://albumentations.ai/"> Albumentations </a>library which provides a significant library of image augmentations that may be used for preparing data for a deep learning. In the case of the variable image size, Albumentations provides a PadIfNeeded method that takes each image and pads it on the borders based on the maximum size expected for both width and height. We elected for padding rather than resizing to reduce the amount of raw pixel transformation that we do in the image as these raw pixels from the CT scan contain important pattern information that could be lost from resizing. This method was one of the only kinds that could be found regarding variable image size padding and was thus a major help in allowing us to use the sagittal images rather than needing to revert to the original axial images. For the image augmentations on the training samples we did the following:
+</p>
+
+<ol>
+  <li>Pad images (If needed) to fit size (768, 1082).</li>
+  <li>Normalize RGB values to values between 0 and 1.</li>
+  <li>Convert the resulting image to the PyTorch Tensor format (C, H, W).</li>
+</ol>  
+
+<p> The intention of this data augmentation pipeline is to prepare the images for the training loop as well as to ensure the best performance of the model. </p>
+
+<h4> Model Training </h4>
+
+<p>For the model training, as mentioned before, we utilized the implementations from HuggingFace. HuggingFace provides an implementation of both ViT and ResNet models that can be trained from random initializations on any sort of image classification task. It also provides the pretrained checkpoints of various pretraining experiments that are carried out by individuals or teams. In this case, we utilized the <a href="https://huggingface.co/google/vit-base-patch16-384"> google/vit-base-patch16-384 </a> checkpoint for ViT and the <a href="https://huggingface.co/microsoft/resnet-50"> microsoft/resnet-50</a> checkpoint for the ResNet. </p>
+
+
+<p>For the models that we used, some alteration was needed to make sure that we are able to use the model for our classification task. The original model checkpoint contained an output layer with 1000 logits for the 1000 ImageNet classes. The first step for this that we did was to update the output layer to fit the 8 possible classes (1 patient overall fracture class, 7 C1-C7 fracture classes). Additionally, since the previous model only predicted a single class out of many classes, a loss function with softmax builtin would be sufficient to calculate the class probability. However, in our case, we needed to allow for multilabel predictions. As a result, rather than applying softmax function to the logits, we instead used the sigmoid function on each logit to calculate its probability for whether or the label that it represents is predicted for that sample. Finally, in the training loop, cross entropy is commonly used for the loss function on many standard multiclass expreiments.</p>
+
+
+<p>Below are the hyperparameters that were using during our training loops: </p>
+
+<div class="row">
+<div class="col-6">
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th scope="col">Hyperparameter/Optimizer</th>
+      <th scope="col">Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row" class="w-25">Loss Function</th>
+      <td class="w-25">Binary Cross Entropy</td>
+    </tr>
+    <tr>
+      <th scope="row" class="w-25">Learning Rate</th>
+      <td class="w-25">3e-05</td>
+    </tr>
+        <tr>
+      <th scope="row" class="w-25">Batch Size</th>
+      <td class="w-25">12</td>
+    </tr>
+    </tr>
+        <tr>
+      <th scope="row" class="w-25">Optimizer</th>
+      <td class="w-25">Adam</td>
+    </tr>
+    <tr>
+      <th scope="row" class="w-25">Adam Betas</th>
+      <td class="w-25">(0.9, 0.999)</td>
+    </tr>
+    <tr>
+      <th scope="row" class="w-25">Adam Epsilon</th>
+      <td class="w-25">1e-08</td>
+    </tr>
+    <tr>
+      <th scope="row" class="w-25">Epochs</th>
+      <td class="w-25">50</td>
+    </tr>
+    <tr>
+      <th scope="row" class="w-25">Learning Rate Sceduler</th>
+      <td class="w-25">Linear</td>
+    </tr>
+
+  </tbody>
+</table>
+
+<div class="text-center caption">
+  <em>
+    Figure 5. ViT Model Training Hyperparameters
+  </em>
+</div>
+
+</div>  
+<div class="col-6">
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th scope="col">Hyperparameter/Optimizer</th>
+      <th scope="col">Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row" class="w-25">Loss Function</th>
+      <td class="w-25">Binary Cross Entropy</td>
+    </tr>
+    <tr>
+      <th scope="row" class="w-25">Learning Rate</th>
+      <td class="w-25">0.5</td>
+    </tr>
+    <tr>
+      <th scope="row" class="w-25">Learning Rate Sceduler</th>
+      <td class="w-25">Cosine Annealing</td>
+    </tr>
+    <tr>
+      <th scope="row" class="w-25">Learning Rate Warmup Epochs</th>
+      <td class="w-25">5</td>
+    </tr>
+    <tr>
+      <th scope="row" class="w-25">Learning Rate Warmup Method</th>
+      <td class="w-25">linear</td>
+    </tr>
+    <tr>
+      <th scope="row" class="w-25">Learning Rate Warmup Decay</th>
+      <td class="w-25">0.01</td>
+    </tr>
+    <tr>
+      <th scope="row" class="w-25">Batch Size</th>
+      <td class="w-25">20</td>
+    </tr>
+    </tr>
+        <tr>
+      <th scope="row" class="w-25">Optimizer</th>
+      <td class="w-25">SGD (Stochastic Gradient Descent)</td>
+    </tr>
+    <tr>
+      <th scope="row" class="w-25">SGD Momentum</th>
+      <td class="w-25">0.9</td>
+    </tr>
+    <tr>
+      <th scope="row" class="w-25">Weight Decay</th>
+      <td class="w-25">2e-05</td>
+    </tr>
+    <tr>
+      <th scope="row" class="w-25">Epochs</th>
+      <td class="w-25">25</td>
+    </tr>
+
+
+
+  </tbody>
+</table>
+
+<div class="text-center caption">
+  <em>
+    Figure 6. ResNet Model Training Hyperparameters
+  </em>
+</div>
+</div>
+</div>
+
+
+<p>These hyperparameters match the settings that were used during the pretraining checkpoint. Although we had to adjust some things like the batch size based on thes size of the GPU compute resources we needed. Additionally, as we will see, the models did not always need the full amount of epochs during training. The code for training both of these models can be found in the <a href="https://github.com/alachyan-ml/cs7150-project/tree/main/notebooks"> notebooks </a> folder of the repository for this project.</p>
+
+
+<h3> Results </h3>
+
+<h4> Model Training Statistics </h4>
+
+During the training loop progress for each of the models, we collect Epoch Training Loss, Per Batch Training Loss and Epoch Validation loss. These provide some insight into the progress that the model is making towards minimizing the error in the objective loss function. Below the results of those for each model are shown: 
+
+<img src="images/results/vit_loss_graphs.png" class="mx-auto d-block img-fluid inline-block" alt="Vision Transformer Loss Graphs">
+<div class="text-center caption">
+  <em>
+    Figure 7. Vision Transformer Loss Graphs
+  </em>
+</div>
+
+
+<p>When we analyze these graphs, it is fairly apparent that we are seeing some sort of convergence on the model with the training loss gong to near 0 at approximately 10 epochs. One thing that we do notice that may suggest overfitting in this case for ViT is the large jagged peaks in the Epoch Validation graph. This suggests that changes made by backpropagation at each epoch is causing inconsistent validation performance and likely not learning the functionality of spine fracture detection and rather some other feature recognition. We will analyze the performance further with a holdout test set to evaluate the performance of the data on a new dataset that it has never seen before. </p>
+
+<img src="images/results/resnet_loss_graphs.png" class="mx-auto d-block img-fluid inline-block" alt="Vision Transformer Loss Graphs">
+<div class="text-center caption">
+  <em>
+    Figure 8. ResNet Loss Graphs
+  </em>
+</div>
+
+<p>Similar to the last graph, we see the model converging with a near-zero training loss at approximately 10 epochs. In this case however, we do not see the jagged validation loss that we saw in the case of the ViT model. This suggests that we are not necessarily overfitting. However we will only know the trust performance when we evaluate the model on a holdout set.</p>
+
+<h4> Test Results </h4>
+
+<p> As mentioned above, to test the performance and generalization of the two models, we have a holdout test dataset of 3 patient scans. These images were fed into the model in inference mode using the same sagittal transformation and image augmentations described in the methods section. Each of the 3 patients had the same C1 fracture so we were looking for the same classification output from the model for all the images passed in. </p>
+
+<p>From the ViT, we passed approximately 300 CT scan samples from the 300 patients and received 5 correct predictions. This performance is plausible given that we see symptoms of overfitting in the validation graph. Below are the images that were correctly predicted from the holdout test set</p>
+
+<div class="container">
+<div class="row">
+<div class="col">
+<img src="images/results/correct_vit_test_0.png" class="img-fluid" alt="First ViT Correct Prediction">
+</div>  
+<div class="col">
+<img src="images/results/correct_vit_test_1.png" class="img-fluid" alt="Second ViT Correct Prediction">
+</div>
+<div class="col">
+<img src="images/results/correct_vit_test_2.png" class="img-fluid" alt="Third ViT Correct Prediction">
+</div>
+</div>
+<div class="row">
+<div class="col-sm-4 offset-sm-2">
+<img src="images/results/correct_vit_test_3.png" class="img-fluid" alt="Fourth ViT Correct Prediction">
+</div>  
+<div class="col-sm-4">
+<img src="images/results/correct_vit_test_4.png" class="img-fluid" alt="Fifth ViT Correct Prediction">
+</div>
+</div>
+
+<div class="text-center caption">
+  <em>
+    Figure 8. Vision Transformer Correctly Predicted Test Samples.
+  </em>
+</div>
+</div>
+
+<p> One thing that we notice in thise cases is that 3 of the images in the set of correct predictions do not fully display the cervical spine. This means that the correct prediction is coming for the image even without the features that we are expecting. More investigation may be needed to be able to fully understand what the reason for this output may be, but in the case of the features and performance of the model, we cannot confidently say that the ViT has learned the ability to detect spinal cord fractions. </p>
+
+<p>When we look at the ResNet model, the trained model actually did not predict any correct test samples. This is a counterintuitive result because we see many of the signals during training that suggest a well generalized model based on the validation loss. An option for us to investigate this failure in inference would be to look at the class activation mapping visualization that we saw before </p>
+
+
+
+
+<h3> Slides </h3>
+
+<p> A PDF of the slides for the presentation given on the Final Project Fair can be found under the <a href="https://github.com/alachyan-ml/cs7150-project/tree/main/slides"> slides </a> directory of this project.</p>
+
+<h3>References</h3>
+
+
+<p>[1] Dosovitskiy, A., Beyer, L., Kolesnikov, A., Weissenborn, D., Zhai, X., Unterthiner, T. & Houlsby, N. "An image is worth 16x16 words: Transformers for image recognition at scale". <em>arXiv preprint arXiv:2010.11929,</em>  2020.</p>
+
+<p>[2] He, K., Zhang, X., Ren, S., and Sun, J., "Deep Residual Learning for Image Recognition", <em> arXiv preprints arXiv:1512.03385,</em> 2015.
+</p>
+
+<p>[3] Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N Gomez, Łukasz Kaiser, and Illia Polosukhin. "Attention is all you need." <em>In NIPS</em>, 2017.</p>
+
+<p>[4] Niki Parmar, Ashish Vaswani, Jakob Uszkoreit, Lukasz Kaiser, Noam Shazeer, Alexander Ku, and Dustin Tran. "Image Transformer". <em>In ICML</em>, 2018.</p>
+
+<p>[5] Josip Djolonga, Jessica Yung, Michael Tschannen, Rob Romijnders, Lucas Beyer, Alexander Kolesnikov, Joan Puigcerver, Matthias Minderer, Alexander D’Amour, Dan Moldovan, Sylvan Gelly, Neil Houlsby, Xiaohua Zhai, and Mario Lucic. "On robustness and transferability of convolutional neural networks". <em>arXiv:2007.08558</em>, 2020.</p>
+
+<h2>Team Members</h2>
+                                                   
+<p>Aniket Lachyankar (lachyankar.a@northeastern.edu) and Satwik Kamarthi (kamarthi.s@northeastern.edu) </p>
+
+  
+</div><!--col-->
+</div><!--row -->
+</div> <!-- container -->
+
+<footer class="nd-pagefooter">
+  <div class="row">
+    <div class="col-6 col-md text-center">
+      <a href="https://cs7150.baulab.info/">About CS 7150</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+<script>
+$(document).on('click', '.clickselect', function(ev) {
+  var range = document.createRange();
+  range.selectNodeContents(this);
+  var sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+});
+// Google analytics below.
+window.dataLayer = window.dataLayer || [];
+</script>
+</html>
